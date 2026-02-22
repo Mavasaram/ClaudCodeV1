@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+node_modules/
+.DS_Store
+sample_data/
+.env
+/.vscode/
+/.idea/
+coverage/
+dist/
+build/

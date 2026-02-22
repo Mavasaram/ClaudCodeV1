@@ -1,0 +1,8 @@
+pandas
+openpyxl
+reportlab
+pdfplumber
+camelot-py[cv]
+pytesseract
+pdf2image
+python-dateutil
