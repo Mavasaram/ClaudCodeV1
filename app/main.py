@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Header
+from fastapi import FastAPI, UploadFile, File, HTTPException, Header, Request
 from fastapi.responses import JSONResponse
 import shutil
 from pathlib import Path
@@ -104,7 +104,7 @@ def api_run_simulation(invoice_number: str):
 
 
 @app.post('/migrate_memory')
-def api_migrate_memory(payload: dict, x_migrate_secret: str = Header(None)):
+def api_migrate_memory(payload: dict, request: Request, x_migrate_secret: str = Header(None)):
     """Securely migrate an exported in-memory approvals/audit dump into SQLite.
 
     Protect this endpoint by setting the `MIGRATE_SECRET` env var on the server and
@@ -114,6 +114,15 @@ def api_migrate_memory(payload: dict, x_migrate_secret: str = Header(None)):
       - { "json_path": "/path/to/dump.json" }
       - { "store": {...}, "audit": {...} }
     """
+    # only allow requests coming from localhost (127.0.0.1 or ::1)
+    client_host = None
+    try:
+        client_host = request.client.host
+    except Exception:
+        client_host = None
+    if client_host not in ('127.0.0.1', '::1', 'localhost'):
+        raise HTTPException(status_code=403, detail=f'Migration endpoint allowed only from localhost (got {client_host})')
+
     expected = os.getenv('MIGRATE_SECRET')
     if not expected:
         raise HTTPException(status_code=400, detail='Server migration secret not configured (MIGRATE_SECRET)')
